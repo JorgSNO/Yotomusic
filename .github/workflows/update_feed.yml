@@ -13,10 +13,16 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-node-version: '3.10'
+
+    # Bruker pip til å installere yt-dlp stabilt, og apt til ffmpeg
     - name: Install yt-dlp and ffmpeg
       run: |
-        sudo wget https://github.com -O /usr/local/bin/yt-dlp
-        sudo chmod a+rx /usr/local/bin/yt-dlp
+        python -m pip install --upgrade pip
+        pip install yt-dlp
         sudo apt-get update && sudo apt-get install -y ffmpeg
 
     - name: Download and convert to MP3
@@ -33,5 +39,5 @@ jobs:
         git config --global user.name "GitHub Action"
         git config --global user.email "action@github.com"
         git add mp3/*.mp3 feed.xml
-        git commit -m "Added new episode from YouTube"
+        git commit -m "Added new episode from YouTube" || echo "No changes to commit"
         git push

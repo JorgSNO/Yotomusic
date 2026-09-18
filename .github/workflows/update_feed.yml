@@ -1,4 +1,37 @@
+name: Update RSS Feed
+on:
+  workflow_dispatch:
+    inputs:
+      youtube_url:
+        description: 'YouTube Video URL'
+        required: true
+
+jobs:
+  download-and-convert:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install yt-dlp and ffmpeg
+      run: |
+        sudo wget https://github.com -O /usr/local/bin/yt-dlp
+        sudo chmod a+rx /usr/local/bin/yt-dlp
+        sudo apt-get update && sudo apt-get install -y ffmpeg
+
     - name: Download and convert to MP3
       run: |
         mkdir -p mp3
         yt-dlp -x --audio-format mp3 --audio-quality 192k --postprocessor-args "ffmpeg: -ac 2 -ar 44100" -o "mp3/%(title)s.%(ext)s" "${{ github.event.inputs.youtube_url }}"
+
+    - name: Generate RSS Feed
+      run: |
+        python generate_rss.py
+
+    - name: Commit and Push changes
+      run: |
+        git config --global user.name "GitHub Action"
+        git config --global user.email "action@github.com"
+        git add mp3/*.mp3 feed.xml
+        git commit -m "Added new episode from YouTube"
+        git push

@@ -1,0 +1,4 @@
+    - name: Download and convert to MP3
+      run: |
+        mkdir -p mp3
+        yt-dlp -x --audio-format mp3 --audio-quality 192k --postprocessor-args "ffmpeg: -ac 2 -ar 44100" -o "mp3/%(title)s.%(ext)s" "${{ github.event.inputs.youtube_url }}"
